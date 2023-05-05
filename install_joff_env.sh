@@ -3,9 +3,13 @@
 # Clone the bare repository from Github, clean local config and set alias
 # NOTE: thanks to https://www.atlassian.com/git/tutorials/dotfiles
 git clone --bare https://github.com/JoffreyLGT/dotfiles.git $HOME/.cfg
-function config {
-   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
-}
+# Set config alias into .bashrc
+alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME' >> $HOME/.bashrc
+source $HOME/.bashrc
+
+#function config {
+#   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
+#}
 mkdir -p .config-backup
 config checkout
 if [ $? = 0 ]; then
