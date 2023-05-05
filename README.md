@@ -1,5 +1,11 @@
 # Joff's NeoVim config
 
+## Install script
+
+```shell
+curl -Lks https://raw.githubusercontent.com/JoffreyLGT/dotfiles/main/install_joff_env.sh | /bin/bash && source .profile
+```
+
 ## Requirements
 
 ### MacOS
