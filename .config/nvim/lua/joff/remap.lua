@@ -9,7 +9,8 @@ vim.keymap.set("n", "<leader>nh", ":nohl<CR>")
 vim.keymap.set("n", "x", '"_x')
 
 -- Display project view (files)
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+-- Not useful anymore since I switched to nvim-tree
+--vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
 -- To move selected lines up and down
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
