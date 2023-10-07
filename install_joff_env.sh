@@ -2,8 +2,8 @@
 
 # Save the files that will be erased if they exists
 mkdir -p .config-backup
-mv .config/nvim .config-backup
-mv .tmux.conf .config-backup
+cp -R .config/nvim .config-backup
+cp .tmux.conf .config-backup
 
 # Clone the bare repository from Github, clean local config and set alias
 # NOTE: thanks to https://www.atlassian.com/git/tutorials/dotfiles
@@ -25,12 +25,5 @@ NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ho
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Install Neovim and ripgrep
-brew install neovim ripgrep
-
-# Install packer to manage Neovim packages
-git clone --depth 1 https://github.com/wbthomason/packer.nvim \
- ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-
-# To start nvim, install packer package and close it
-nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+brew install neovim ripgrep gnu-sed
 

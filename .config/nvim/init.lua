@@ -43,6 +43,9 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+require 'custom.python'
+require 'custom.settings'
+
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -132,15 +135,6 @@ require('lazy').setup({
     },
   },
 
-  -- {
-  -- Theme inspired by Atom
-  -- 'navarasu/onedark.nvim',
-  -- priority = 1000,
-  -- config = function()
-  --   vim.cmd.colorscheme 'onedark'
-  -- end,
-  -- },
-
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -148,7 +142,8 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        -- Not setting themes set it to the curret neovim theme
+        -- theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
@@ -160,9 +155,12 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
+
     opts = {
       char = '┊',
+      indent_blankline_use_treesitter = true, -- Use treesitter when possible
       show_trailing_blankline_indent = false,
+      show_current_context = true,            -- Highlight current context indent character
     },
   },
 
@@ -218,8 +216,28 @@ require('lazy').setup({
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
+-- Set theme
+vim.cmd.colorscheme 'tokyonight'
+
+-- Always display sign column to avoid bouncing effect with linters
+vim.o.signcolumn = "yes"
+
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
+-- Clear search highlights
+vim.keymap.set("n", "<leader>cs", ":nohl<CR>", { desc = "[c]lear [s]earch highlights" })
+
+-- Delete the char but doesn't place it into a register
+vim.keymap.set("n", "x", '"_x')
+
+-- To move selected lines up and down
+vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selected 1 line up" })
+vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selected 1 line down" })
+
+-- Buffer management
+vim.keymap.set("n", "<leader>tx", ":bd<CR>", { desc = "Delete [t]ab [x]" })        -- close current tab
+vim.keymap.set("n", "<leader>tn", ":bnext<CR>", { desc = "[t]ab [n]ext" })         --  go to next tab
+vim.keymap.set("n", "<leader>tp", ":bprevious<CR>", { desc = "[t]ab [p]revious" }) --  go to previous tab
 
 -- Make line numbers default
 vim.wo.number = true
@@ -276,9 +294,33 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
+-- Customize diagnostic messages
+vim.diagnostic.config({
+  virtual_text = {
+    source = "if_many" },
+  float = {
+    source = 'if_many',
+  },
+})
+
+
+
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
-require('telescope').setup {
+
+local telescope = require("telescope")
+local telescopeConfig = require("telescope.config")
+
+-- Clone the default Telescope configuration
+local vimgrep_arguments = { unpack(telescopeConfig.values.vimgrep_arguments) }
+
+-- I want to search in hidden/dot files.
+table.insert(vimgrep_arguments, "--hidden")
+-- I don't want to search in the `.git` directory.
+table.insert(vimgrep_arguments, "--glob")
+table.insert(vimgrep_arguments, "!**/.git/*")
+
+telescope.setup({
   defaults = {
     mappings = {
       i = {
@@ -287,7 +329,13 @@ require('telescope').setup {
       },
     },
   },
-}
+  pickers = {
+    find_files = {
+      -- `hidden = true` will still show the inside of `.git/` as it's not `.gitignore`d.
+      find_command = { "rg", "--files", "-L", "--hidden", "--glob", "!**/.git/*" },
+    }
+  }
+})
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -299,7 +347,7 @@ vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
     winblend = 10,
-    previewer = false,
+    previewer = false
   })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
@@ -438,17 +486,33 @@ end
 local servers = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  pyright = {
+    settings = {
+      python = {
+        analysis = {
+          autoSearchPaths = true,
+          diagnosticMode = "openFilesOnly",
+          useLibraryCodeForTypes = true
+        }
+      }
+    }
+  },
   -- rust_analyzer = {},
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
+  ruff_lsp = {
+    settings = {
+      -- Any extra CLI arguments for 'ruff'
+      args = {},
+    },
+  },
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
     },
   },
+  astro = {}
 }
 
 -- Setup neovim lua configuration
@@ -468,6 +532,7 @@ mason_lspconfig.setup {
 mason_lspconfig.setup_handlers {
   function(server_name)
     require('lspconfig')[server_name].setup {
+      init_options = (servers[server_name] or {}).init_options,
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
@@ -476,6 +541,41 @@ mason_lspconfig.setup_handlers {
   end
 }
 
+-- Special case for efm
+-- Out-of-box configuration available here: https://github.com/creativenull/efmls-configs-nvim
+require("lspconfig").efm.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  init_options = { documentFormatting = true },
+  settings = {
+    rootMarkers = { ".git/" },
+    languages = {
+      bash = {
+        require("efmls-configs.linters.bashate"),
+        require("efmls-configs.formatters.shfmt"),
+      },
+      markdown = {
+        require("efmls-configs.linters.markdownlint"),
+        require("efmls-configs.formatters.dprint"),
+      },
+      python = {
+        {
+          formatCommand = 'ruff check --fix-only --no-cache --stdin-filename "${INPUT}"',
+          rootMarkers = { 'pyproject.toml', 'setup.py', 'requirements.txt' },
+          formatStdin = true
+        },
+        {
+          formatCommand = 'black --no-color -q -',
+          formatStdin = true
+        },
+        require("efmls-configs.linters.mypy"),
+      },
+      toml = {
+        { formatCommand = "taplo format -", formatStdin = true, formatCanRange = true }
+      }
+    }
+  }
+}
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
