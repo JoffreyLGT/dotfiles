@@ -550,6 +550,15 @@ require("lspconfig").efm.setup {
   settings = {
     rootMarkers = { ".git/" },
     languages = {
+      astro = {
+        require('efmls-configs.formatters.prettier'),
+      },
+      javascript = {
+        require('efmls-configs.formatters.prettier'),
+      },
+      typescript = {
+        require('efmls-configs.formatters.prettier'),
+      },
       bash = {
         require("efmls-configs.linters.bashate"),
         require("efmls-configs.formatters.shfmt"),
