@@ -155,12 +155,12 @@ require('lazy').setup({
     'lukas-reineke/indent-blankline.nvim',
     -- Enable `lukas-reineke/indent-blankline.nvim`
     -- See `:help indent_blankline.txt`
-
+    main = "ibl",
     opts = {
-      char = '┊',
-      indent_blankline_use_treesitter = true, -- Use treesitter when possible
-      show_trailing_blankline_indent = false,
-      show_current_context = true,            -- Highlight current context indent character
+      indent = {
+        char = '┊',
+
+      },
     },
   },
 
