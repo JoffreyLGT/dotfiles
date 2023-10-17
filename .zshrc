@@ -89,7 +89,7 @@ eval "$(starship init zsh)"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-auto-venv zsh-autosuggestions zsh-syntax-highlighting web-search poetry)
+plugins=(git zsh-auto-venv zsh-autosuggestions zsh-syntax-highlighting web-search poetry tmux tmuxinator)
 # see dotenv
 source $ZSH/oh-my-zsh.sh
 

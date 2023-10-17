@@ -25,5 +25,5 @@ NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Ho
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Install Neovim and ripgrep
-brew install neovim ripgrep gnu-sed
+brew install neovim ripgrep gnu-sed tmux tmuxinator direnv lazygit tree
 
