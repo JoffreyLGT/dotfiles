@@ -19,6 +19,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # Add an alias for my git bare repos
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias layconf='lazygit --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 alias tmux="tmux -2"
 
 # Set name of the theme to load --- if set to "random", it will
@@ -138,6 +139,6 @@ eval "$(register-python-argcomplete pipx)"
 # Poetry default virtualenv dir
 export POETRY_VIRTUALENVS_PATH=~/.virtualenvs
 
-# To have correct terminal intalic
-export TERM=xterm-256color
+# To have correct terminal italic
+export TERM=screen-256color
 

@@ -18,10 +18,10 @@ return {
     priority = 1000,
     config = function()
       require("catppuccin").setup({
-        flavour = "mocha", -- latte, frappe, macchiato, mocha
-        background = {     -- :h background
+        flavour = "macchiato", -- latte, frappe, macchiato, mocha
+        background = {         -- :h background
           light = "latte",
-          dark = "mocha",
+          dark = "macchiato",
         },
         integrations = {
           cmp = true,
@@ -148,13 +148,13 @@ return {
   -- },
 
   -- Display buffers as tabs
-  {
-    'akinsho/bufferline.nvim',
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
-    config = function()
-      require("bufferline").setup {}
-    end,
-  },
+  -- {
+  --   'akinsho/bufferline.nvim',
+  --   dependencies = { 'nvim-tree/nvim-web-devicons' },
+  --   config = function()
+  --     require("bufferline").setup {}
+  --   end,
+  -- },
 
   -- Previw markdown file in web browser with sync
   {

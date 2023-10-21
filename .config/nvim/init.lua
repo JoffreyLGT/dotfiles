@@ -85,6 +85,7 @@ require('lazy').setup({
     dependencies = {
       -- Automatically install LSPs to stdpath for neovim
       { 'williamboman/mason.nvim', config = true },
+
       'williamboman/mason-lspconfig.nvim',
 
       -- Useful status updates for LSP
@@ -109,6 +110,9 @@ require('lazy').setup({
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
+
+      -- Display tailwindcss colors as icon in kind field
+      { "roobert/tailwindcss-colorizer-cmp.nvim", config = true },
     },
   },
 
@@ -141,9 +145,9 @@ require('lazy').setup({
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
+        icons_enabled = true,
         -- Not setting themes set it to the curret neovim theme
-        -- theme = 'auto',
+        -- theme = 'catppuccin',
         component_separators = '|',
         section_separators = '',
       },
@@ -193,6 +197,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
+      -- 'JoosepAlviste/nvim-ts-context-commentstring',
     },
     build = ':TSUpdate',
   },
@@ -217,7 +222,7 @@ require('lazy').setup({
 -- NOTE: You can change these options as you wish!
 
 -- Set theme
-vim.cmd.colorscheme 'tokyonight'
+vim.cmd.colorscheme 'catppuccin'
 
 -- Always display sign column to avoid bouncing effect with linters
 vim.o.signcolumn = "yes"
@@ -362,10 +367,11 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim',
+    "astro" },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
+  auto_install = true,
 
   highlight = { enable = true },
   indent = { enable = true },
@@ -421,6 +427,9 @@ require('nvim-treesitter.configs').setup {
         ['<leader>A'] = '@parameter.inner',
       },
     },
+  },
+  context_commentstring = {
+    enable = true,
   },
 }
 
@@ -585,9 +594,78 @@ require("lspconfig").efm.setup {
     }
   }
 }
+-- icons used by other plugins
+-- stylua: ignore
+icons = {
+  misc = {
+    dots = "󰇘",
+  },
+  dap = {
+    Stopped             = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
+    Breakpoint          = " ",
+    BreakpointCondition = " ",
+    BreakpointRejected  = { " ", "DiagnosticError" },
+    LogPoint            = ".>",
+  },
+  diagnostics = {
+    Error = " ",
+    Warn  = " ",
+    Hint  = " ",
+    Info  = " ",
+  },
+  git = {
+    added    = " ",
+    modified = " ",
+    removed  = " ",
+  },
+  kinds = {
+    Array         = " ",
+    Boolean       = "󰨙 ",
+    Class         = " ",
+    Codeium       = "󰘦 ",
+    Color         = " ",
+    Control       = " ",
+    Collapsed     = " ",
+    Constant      = "󰏿 ",
+    Constructor   = " ",
+    Copilot       = " ",
+    Enum          = " ",
+    EnumMember    = " ",
+    Event         = " ",
+    Field         = " ",
+    File          = " ",
+    Folder        = " ",
+    Function      = "󰊕 ",
+    Interface     = " ",
+    Key           = " ",
+    Keyword       = " ",
+    Method        = "󰊕 ",
+    Module        = " ",
+    Namespace     = "󰦮 ",
+    Null          = " ",
+    Number        = "󰎠 ",
+    Object        = " ",
+    Operator      = " ",
+    Package       = " ",
+    Property      = " ",
+    Reference     = " ",
+    Snippet       = " ",
+    String        = " ",
+    Struct        = "󰆼 ",
+    TabNine       = "󰏚 ",
+    Text          = " ",
+    TypeParameter = " ",
+    Unit          = " ",
+    Value         = " ",
+    Variable      = "󰀫 ",
+  },
+}
+
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
 local cmp = require 'cmp'
+local defaultFormatting = cmp.formatting
+
 local luasnip = require 'luasnip'
 require('luasnip.loaders.from_vscode').lazy_load()
 luasnip.config.setup {}
@@ -596,6 +674,17 @@ cmp.setup {
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
+    end,
+  },
+  formatting = {
+    format = function(entry, item)
+      -- Display colors as kind for tailwindcss color classes
+      item = require("tailwindcss-colorizer-cmp").formatter(entry, item)
+      -- Display an icon depending on the type
+      if icons.kinds[item.kind] then
+        item.kind = icons.kinds[item.kind]
+      end
+      return item
     end,
   },
   mapping = cmp.mapping.preset.insert {
