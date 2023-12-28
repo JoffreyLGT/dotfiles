@@ -140,5 +140,14 @@ eval "$(register-python-argcomplete pipx)"
 export POETRY_VIRTUALENVS_PATH=~/.virtualenvs
 
 # To have correct terminal italic
-export TERM=screen-256color
+# export TERM=screen-256color
+
+
+# pnpm
+export PNPM_HOME="/Users/joffrey/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
 

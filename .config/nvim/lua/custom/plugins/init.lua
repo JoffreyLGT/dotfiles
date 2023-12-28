@@ -137,7 +137,23 @@ return {
 
   -- Allow usage of vim keybindings to move between panes in vim and tmux.
   -- Must have tmux plugin installed as well in tmux.
-  'christoomey/vim-tmux-navigator',
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+      { "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
 
   -- Auto pair parenthesis and color their matching closure
   -- {
@@ -172,7 +188,6 @@ return {
   {
     "rcarriga/nvim-notify",
     config = function()
-      vim.o.termguicolors = true
       vim.keymap.set('n', '<leader>sn', require('telescope').extensions.notify.notify,
         { desc = '[S]earch in [n]otifications' })
       require("notify").setup({

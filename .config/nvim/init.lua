@@ -43,6 +43,10 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Must be set first so plugins can detect it.
+vim.o.termguicolors = true
+
+
 require 'custom.python'
 require 'custom.settings'
 
@@ -274,9 +278,6 @@ vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
-
--- NOTE: You should make sure your terminal supports this
-vim.o.termguicolors = true
 
 -- [[ Basic Keymaps ]]
 
@@ -566,6 +567,9 @@ require("lspconfig").efm.setup {
         require('efmls-configs.formatters.prettier'),
       },
       typescript = {
+        require('efmls-configs.formatters.prettier'),
+      },
+      typescriptreact = {
         require('efmls-configs.formatters.prettier'),
       },
       bash = {
