@@ -61,6 +61,11 @@ local config = {
     }
   },
 
+  -- [[ Configure LSP ]]
+  --  This function gets run when an LSP connects to a particular buffer.
+  --  Provides keymap.
+  on_attach = require("custom.lsp-on-attach"),
+
   handlers = {
     ['$/progress'] = function(_, result, ctx)
       -- disable progress updates to avoid messages displayed for every character input
