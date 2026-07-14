@@ -36,3 +36,6 @@ mkdir -p ~/.local/share/fonts/JetBrainsMono
 unzip /tmp/JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
 fc-cache -fv
 
+# Install lazyvim
+git clone https://github.com/LazyVim/starter ~/.config/nvim
+rm -rf ~/.config/nvim/.git
