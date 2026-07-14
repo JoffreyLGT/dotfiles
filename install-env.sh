@@ -13,7 +13,7 @@ cp .bashrc .config-backup
 git clone --bare https://github.com/JoffreyLGT/dotfiles.git $HOME/.cfg
 
 function config {
-   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
+  /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
 }
 
 config checkout --force
@@ -21,13 +21,15 @@ config config status.showUntrackedFiles no
 
 # Install packages from snap store
 sudo snap install nvim --classic
-sudo snap install tmux --classic
 sudo snap install tree lazygit direnv
 
 # Install packages from apt
-sudo apt install -y gnome-tweaks curl
+sudo apt install -y gnome-tweaks curl wl-clipboard tmux
 # Set Capslock as Ctrl
 gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
+
+# Install tmux packages manager (tpm)
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 # Install JetBrainsMono Nerd Font and set it as default font for gnome terminal
 # Download, unzip and install the font
