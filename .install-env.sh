@@ -24,7 +24,7 @@ sudo snap install nvim --classic
 sudo snap install tree lazygit direnv
 
 # Install packages from apt
-sudo apt install -y gnome-tweaks curl wl-clipboard tmux
+sudo apt install -y gnome-tweaks curl wl-clipboard tmux ripgrep
 # Set Capslock as Ctrl
 gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
 
@@ -41,3 +41,19 @@ fc-cache -fv
 # Install lazyvim
 git clone https://github.com/LazyVim/starter ~/.config/nvim
 rm -rf ~/.config/nvim/.git
+
+# Install the C toolchain used by Rust
+sudo apt install clang libclang-dev
+# Install Rust to be able to install the latest version of treesitter
+curl https://sh.rustup.rs -sSf | sh
+# Install treesitter
+cargo install --locked tree-sitter-cli
+
+# Install claude code
+sudo install -d -m 0755 /etc/apt/keyrings
+sudo curl -fsSL https://downloads.claude.ai/keys/claude-code.asc \
+  -o /etc/apt/keyrings/claude-code.asc
+echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main" |
+  sudo tee /etc/apt/sources.list.d/claude-code.list
+sudo apt update
+sudo apt install claude-code
