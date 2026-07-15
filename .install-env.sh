@@ -10,7 +10,7 @@ cp .bashrc .config-backup
 
 # Clone the bare repository from Github, clean local config and set alias
 # NOTE: thanks to https://www.atlassian.com/git/tutorials/dotfiles
-git clone --bare https://github.com/JoffreyLGT/dotfiles.git $HOME/.cfg
+git clone --bare git@github.com:JoffreyLGT/dotfiles.git $HOME/.cfg
 
 function config {
   /usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME $@
@@ -18,6 +18,9 @@ function config {
 
 config checkout --force
 config config status.showUntrackedFiles no
+
+# Set global git config
+git config --global push.autoSetupRemote true
 
 # Install packages from snap store
 sudo snap install nvim --classic
