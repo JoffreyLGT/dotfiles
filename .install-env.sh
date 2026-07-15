@@ -69,3 +69,7 @@ sudo apt install -y npm
 
 # Install Python and dev tools
 sudo apt install -y python3 python3-pip python3-venv python3-dev
+
+# Install Elixir
+curl -fsSO https://elixir-lang.org/install.sh
+sh install.sh elixir@1.20.2 otp@28.4

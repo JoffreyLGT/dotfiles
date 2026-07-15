@@ -120,3 +120,6 @@ eval "$(starship init bash)"
 . "$HOME/.cargo/env"
 
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+
+export PATH=$HOME/.elixir-install/installs/otp/28.4/bin/:$PATH
+export PATH=$HOME/.elixir-install/installs/elixir/1.20.2-otp-28/bin:$PATH
