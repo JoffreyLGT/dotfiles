@@ -27,7 +27,7 @@ sudo snap install nvim --classic
 sudo snap install tree lazygit direnv
 
 # Install packages from apt
-sudo apt install -y gnome-tweaks curl wl-clipboard tmux ripgrep
+sudo apt install -y gnome-tweaks curl wl-clipboard tmux ripgrep fd-find unzip
 # Set Capslock as Ctrl
 gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']"
 
@@ -63,3 +63,9 @@ sudo apt install claude-code
 
 # Install starship shell
 curl -sS https://starship.rs/install.sh | sh
+
+# Install NPM
+sudo apt install -y npm
+
+# Install Python and dev tools
+sudo apt install -y python3 python3-pip python3-venv python3-dev
