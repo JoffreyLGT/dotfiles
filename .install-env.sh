@@ -57,3 +57,6 @@ echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude
   sudo tee /etc/apt/sources.list.d/claude-code.list
 sudo apt update
 sudo apt install claude-code
+
+# Install starship shell
+curl -sS https://starship.rs/install.sh | sh
