@@ -103,7 +103,10 @@ if ! command_exists elixir; then
 fi
 
 echo "Install Ruby"
-sudo apt install ruby-full
+sudo apt install -y ruby-full
 echo "Install tmuxinator"
 gem install tmuxinator
 sudo curl -L https://raw.githubusercontent.com/tmuxinator/tmuxinator/master/completion/tmuxinator.bash -o /etc/bash_completion.d/tmuxinator.bash
+
+echo "Install dotnet 10"
+sudo apt install -y dotnet-sdk-10.0
