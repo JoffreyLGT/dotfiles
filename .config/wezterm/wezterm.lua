@@ -20,6 +20,16 @@ config.color_scheme = scheme_for_appearance(wezterm.gui.get_appearance())
 -- Visual customization
 config.window_background_opacity = 1
 
+-- Trim the gap between the terminal content (including the tmux status bar)
+-- and the window edges. WezTerm's default padding leaves a noticeable strip
+-- at the bottom; pull it in, with no padding below the last row.
+config.window_padding = {
+	left = 4,
+	right = 4,
+	top = 2,
+	bottom = 0,
+}
+
 -- "INTEGRATED_BUTTONS|RESIZE" keeps the borders resizable and
 -- puts the Min/Max/Close buttons in the tab bar (modern look).
 config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
