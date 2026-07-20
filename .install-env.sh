@@ -287,6 +287,7 @@ EXTRA_APPS=(
   "Obsidian|obsidian|sudo snap install obsidian --classic"
   "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
   "Bruno|bruno|sudo snap install bruno"
+  "Podman|podman|sudo apt install -y podman"
 )
 
 for entry in "${EXTRA_APPS[@]}"; do
