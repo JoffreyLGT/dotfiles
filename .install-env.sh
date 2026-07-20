@@ -24,10 +24,10 @@ else
   BOLD="" BLUE="" GREEN="" YELLOW="" RESET=""
 fi
 
-step()    { printf "\n%s==> %s%s\n" "$BOLD$BLUE" "$1" "$RESET"; }
-info()    { printf "    %s\n" "$1"; }
+step() { printf "\n%s==> %s%s\n" "$BOLD$BLUE" "$1" "$RESET"; }
+info() { printf "    %s\n" "$1"; }
 success() { printf "    %s\xe2\x9c\x93 %s%s\n" "$GREEN" "$1" "$RESET"; }
-skip()    { printf "    %s\xe2\x80\xa2 %s (already present, skipping)%s\n" "$YELLOW" "$1" "$RESET"; }
+skip() { printf "    %s\xe2\x80\xa2 %s (already present, skipping)%s\n" "$YELLOW" "$1" "$RESET"; }
 
 # ---------------------------------------------------------------------------
 # Idempotency helpers — never re-download or re-install what already exists
@@ -35,11 +35,12 @@ skip()    { printf "    %s\xe2\x80\xa2 %s (already present, skipping)%s\n" "$YEL
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 font_installed() { fc-list 2>/dev/null | grep -qi "$1"; }
 snap_installed() { snap list "$1" >/dev/null 2>&1; }
-apt_installed()  { dpkg -s "$1" >/dev/null 2>&1; }
+apt_installed() { dpkg -s "$1" >/dev/null 2>&1; }
 
 # Install a snap package only if it is missing.
 install_snap() {
-  local pkg="$1"; shift
+  local pkg="$1"
+  shift
   if snap_installed "$pkg"; then
     skip "$pkg"
   else
@@ -82,16 +83,16 @@ else
   backup_answer="n"
 fi
 case "$backup_answer" in
-  [yY]*)
-    mkdir -p .config-backup
-    [ -e .config/nvim ] && cp -R .config/nvim .config-backup && info "Backed up .config/nvim"
-    [ -e .tmux.conf ]   && cp .tmux.conf .config-backup    && info "Backed up .tmux.conf"
-    [ -e .bashrc ]      && cp .bashrc .config-backup       && info "Backed up .bashrc"
-    success "Backups stored in ~/.config-backup"
-    ;;
-  *)
-    info "Skipping config backup"
-    ;;
+[yY]*)
+  mkdir -p .config-backup
+  [ -e .config/nvim ] && cp -R .config/nvim .config-backup && info "Backed up .config/nvim"
+  [ -e .tmux.conf ] && cp .tmux.conf .config-backup && info "Backed up .tmux.conf"
+  [ -e .bashrc ] && cp .bashrc .config-backup && info "Backed up .bashrc"
+  success "Backups stored in ~/.config-backup"
+  ;;
+*)
+  info "Skipping config backup"
+  ;;
 esac
 
 # ---------------------------------------------------------------------------
@@ -140,9 +141,9 @@ install_apt gnome-tweaks curl wl-clipboard tmux ripgrep fd-find unzip
 
 # Set Capslock as Ctrl
 info "Mapping Caps Lock to Ctrl..."
-gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" 2>/dev/null \
-  && success "Caps Lock mapped to Ctrl" \
-  || info "Skipped (no GNOME session, e.g. WSL2)"
+gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" 2>/dev/null &&
+  success "Caps Lock mapped to Ctrl" ||
+  info "Skipped (no GNOME session, e.g. WSL2)"
 
 # ---------------------------------------------------------------------------
 # tmux plugin manager (tpm)
@@ -285,6 +286,7 @@ step "Optional extra applications"
 EXTRA_APPS=(
   "Obsidian|obsidian|sudo snap install obsidian --classic"
   "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
+  "Bruno|bruno|sudo snap install bruno"
 )
 
 for entry in "${EXTRA_APPS[@]}"; do
@@ -299,13 +301,13 @@ for entry in "${EXTRA_APPS[@]}"; do
     answer="n"
   fi
   case "$answer" in
-    [yY]*)
-      info "Installing $name..."
-      eval "$install" && success "$name installed"
-      ;;
-    *)
-      info "Skipping $name"
-      ;;
+  [yY]*)
+    info "Installing $name..."
+    eval "$install" && success "$name installed"
+    ;;
+  *)
+    info "Skipping $name"
+    ;;
   esac
 done
 
