@@ -6,5 +6,5 @@ windows:
     layout: 5d85,134x63,0,0{67x63,0,0,0,66x63,68,0[66x8,68,0,1,66x54,68,9,2]}
     panes:
     - nvim
-    - echo "Hello Joff"
+    - cd ~/
     - claude --add-dir ./
