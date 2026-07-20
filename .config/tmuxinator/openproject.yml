@@ -1,0 +1,10 @@
+---
+name: openproject
+project_root: "~/workspaces/OpenProjectTools"
+windows:
+- bash:
+    layout: 3b98,190x42,0,0{95x42,0,0,0,94x42,96,0[94x11,96,0,3,94x30,96,12,4]}
+    panes:
+    - nvim
+    - cd /home/joff/workspaces/OpenProjectTools
+    - claude
