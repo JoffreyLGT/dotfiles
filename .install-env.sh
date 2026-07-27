@@ -286,55 +286,39 @@ install_apt dotnet-sdk-10.0
 # Add new apps as "Display name|check command|install command" entries.
 # ---------------------------------------------------------------------------
 step "Optional extra applications"
-# Obsidian is installed from the .deb on GitHub releases rather than the snap:
-# the snap's launch wrapper dies silently on WSL2 (no XDG user dirs), while the
-# deb runs unconfined and pulls its own dependencies through apt.
-install_obsidian() {
-  local tmpdir deb_url status
-  tmpdir="$(mktemp -d)" || return 1
-  deb_url="$(curl -sL https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
-    grep -o 'https://[^"]*amd64\.deb' | head -1)"
-  if [ -z "$deb_url" ]; then
-    info "Could not find the latest Obsidian .deb URL"
-    rm -rf "$tmpdir"
-    return 1
-  fi
-  info "Downloading $deb_url..."
-  curl -L -o "$tmpdir/obsidian.deb" "$deb_url" &&
-    sudo apt install -y "$tmpdir/obsidian.deb"
-  status=$?
-  rm -rf "$tmpdir"
-  return $status
-}
+# GUI apps glitch under WSLg, so the extras are only proposed on native installs.
+if grep -qi microsoft /proc/version; then
+  info "Skipped (WSL detected)"
+else
+  EXTRA_APPS=(
+    "Obsidian|obsidian|sudo snap install obsidian --classic"
+    "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
+    "Bruno|bruno|sudo snap install bruno"
+    "Podman|podman|sudo apt install -y podman"
+  )
 
-EXTRA_APPS=(
-  "Obsidian|obsidian|install_obsidian"
-  "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
-  "Bruno|bruno|sudo snap install bruno"
-  "Podman|podman|sudo apt install -y podman"
-)
-
-for entry in "${EXTRA_APPS[@]}"; do
-  IFS='|' read -r name check install <<<"$entry"
-  if command_exists "$check" || snap_installed "$check"; then
-    skip "$name"
-    continue
-  fi
-  if [ -t 0 ]; then
-    read -rp "    Install $name? [y/N] " answer
-  else
-    answer="n"
-  fi
-  case "$answer" in
-  [yY]*)
-    info "Installing $name..."
-    eval "$install" && success "$name installed"
-    ;;
-  *)
-    info "Skipping $name"
-    ;;
-  esac
-done
+  for entry in "${EXTRA_APPS[@]}"; do
+    IFS='|' read -r name check install <<<"$entry"
+    if command_exists "$check" || snap_installed "$check"; then
+      skip "$name"
+      continue
+    fi
+    if [ -t 0 ]; then
+      read -rp "    Install $name? [y/N] " answer
+    else
+      answer="n"
+    fi
+    case "$answer" in
+    [yY]*)
+      info "Installing $name..."
+      eval "$install" && success "$name installed"
+      ;;
+    *)
+      info "Skipping $name"
+      ;;
+    esac
+  done
+fi
 
 step "All done! Your environment is ready."
 info "Restart your shell (or run 'exec \$SHELL') to pick up every change."
