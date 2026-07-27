@@ -157,9 +157,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# JetBrainsMono Nerd Font
+# Fonts
 # ---------------------------------------------------------------------------
-step "Installing JetBrainsMono Nerd Font"
+step "Installing fonts"
+# Color emoji font — minimal/WSL2 installs ship no emoji font at all, which
+# leaves Electron apps such as Obsidian rendering emoji as blank boxes.
+install_apt fonts-noto-color-emoji
 if ! font_installed "JetBrainsMono"; then
   info "Downloading and installing the font..."
   curl -L -o /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
