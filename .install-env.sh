@@ -283,8 +283,29 @@ install_apt dotnet-sdk-10.0
 # Add new apps as "Display name|check command|install command" entries.
 # ---------------------------------------------------------------------------
 step "Optional extra applications"
+# Obsidian is installed from the .deb on GitHub releases rather than the snap:
+# the snap's launch wrapper dies silently on WSL2 (no XDG user dirs), while the
+# deb runs unconfined and pulls its own dependencies through apt.
+install_obsidian() {
+  local tmpdir deb_url status
+  tmpdir="$(mktemp -d)" || return 1
+  deb_url="$(curl -sL https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
+    grep -o 'https://[^"]*amd64\.deb' | head -1)"
+  if [ -z "$deb_url" ]; then
+    info "Could not find the latest Obsidian .deb URL"
+    rm -rf "$tmpdir"
+    return 1
+  fi
+  info "Downloading $deb_url..."
+  curl -L -o "$tmpdir/obsidian.deb" "$deb_url" &&
+    sudo apt install -y "$tmpdir/obsidian.deb"
+  status=$?
+  rm -rf "$tmpdir"
+  return $status
+}
+
 EXTRA_APPS=(
-  "Obsidian|obsidian|sudo snap install obsidian --classic"
+  "Obsidian|obsidian|install_obsidian"
   "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
   "Bruno|bruno|sudo snap install bruno"
   "Podman|podman|sudo apt install -y podman"
