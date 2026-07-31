@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Implement the latest plan from docs/plans/ using the plan-implementer agent (Opus 4.8, 1M context, high effort), then loop clean-context simplify → review → fix agents until the review reports no severe findings. Use when the user asks to implement, execute, or build the (latest) plan.
+description: Implement the latest plan from docs/plans/ using the plan-implementer agent (Opus 5, 1M context, high effort), then loop clean-context simplify → review → fix agents until the review reports no severe findings. Use when the user asks to implement, execute, or build the (latest) plan.
 ---
 
 # Implement Plan
