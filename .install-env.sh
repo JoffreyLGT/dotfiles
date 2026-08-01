@@ -100,10 +100,21 @@ esac
 # NOTE: thanks to https://www.atlassian.com/git/tutorials/dotfiles
 # ---------------------------------------------------------------------------
 step "Setting up dotfiles"
+DOTFILES_SSH_URL="git@github.com:JoffreyLGT/dotfiles.git"
+DOTFILES_HTTPS_URL="https://github.com/JoffreyLGT/dotfiles.git"
 freshly_cloned=false
+cloned_via_https=false
 if [ ! -d "$HOME/.cfg" ]; then
-  info "Cloning dotfiles repository..."
-  git clone --bare git@github.com:JoffreyLGT/dotfiles.git "$HOME/.cfg"
+  # Prefer SSH, but fall back to HTTPS when SSH access is not available
+  # (e.g. no key configured yet). The remote is reset to SSH afterwards.
+  info "Cloning dotfiles repository over SSH..."
+  if git clone --bare "$DOTFILES_SSH_URL" "$HOME/.cfg"; then
+    success "Cloned over SSH"
+  else
+    info "SSH clone failed — falling back to HTTPS..."
+    git clone --bare "$DOTFILES_HTTPS_URL" "$HOME/.cfg"
+    cloned_via_https=true
+  fi
   freshly_cloned=true
 else
   skip "dotfiles repository"
@@ -122,6 +133,16 @@ else
   config checkout
 fi
 config config status.showUntrackedFiles no
+
+# If we had to fall back to HTTPS, switch the remote back to SSH so future
+# fetches/pushes use the key-based URL.
+if [ "$cloned_via_https" = true ]; then
+  info "Cloned over HTTPS because SSH was unavailable."
+  info "Resetting the dotfiles remote to SSH for future operations..."
+  config remote remove origin 2>/dev/null
+  config remote add origin "$DOTFILES_SSH_URL"
+  success "Dotfiles remote set to SSH"
+fi
 
 # Set global git config
 git config --global push.autoSetupRemote true
