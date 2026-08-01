@@ -181,15 +181,18 @@ fi
 # Fonts
 # ---------------------------------------------------------------------------
 step "Installing fonts"
-if ! font_installed "JetBrainsMono"; then
+FONT_DIR="$HOME/.local/share/fonts/JetBrainsMono"
+# Check both fontconfig and the install directory: fc-list may be unavailable
+# (e.g. WSL2 without fontconfig), so an on-disk check keeps re-runs idempotent.
+if font_installed "JetBrainsMono" || ls "$FONT_DIR"/*.ttf >/dev/null 2>&1; then
+  skip "JetBrainsMono Nerd Font"
+else
   info "Downloading and installing the font..."
   curl -L -o /tmp/JetBrainsMono.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip
-  mkdir -p ~/.local/share/fonts/JetBrainsMono
-  unzip -o /tmp/JetBrainsMono.zip -d ~/.local/share/fonts/JetBrainsMono
+  mkdir -p "$FONT_DIR"
+  unzip -o /tmp/JetBrainsMono.zip -d "$FONT_DIR"
   fc-cache -f
   success "JetBrainsMono Nerd Font installed"
-else
-  skip "JetBrainsMono Nerd Font"
 fi
 
 # ---------------------------------------------------------------------------
