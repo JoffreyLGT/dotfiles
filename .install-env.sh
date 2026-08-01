@@ -167,6 +167,14 @@ gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" 2>/d
   info "Skipped (no GNOME session, e.g. WSL2)"
 
 # ---------------------------------------------------------------------------
+# GNOME Shell extension support
+# chrome-gnome-shell is the native host connector that lets extensions.gnome.org
+# install and manage extensions from the browser.
+# ---------------------------------------------------------------------------
+step "Installing GNOME Shell extension support"
+install_apt chrome-gnome-shell
+
+# ---------------------------------------------------------------------------
 # tmux plugin manager (tpm)
 # ---------------------------------------------------------------------------
 step "Installing tmux plugin manager (tpm)"
