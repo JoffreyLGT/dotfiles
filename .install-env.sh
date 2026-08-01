@@ -275,6 +275,9 @@ if ! command_exists elixir; then
   info "Downloading the Elixir installer..."
   curl -fsSO https://elixir-lang.org/install.sh
   sh install.sh elixir@1.20.2 otp@28.4
+  # The installer is downloaded into $HOME (cwd); clean it up so it does not
+  # linger in the home folder.
+  rm -f install.sh
   success "Elixir installed"
 else
   skip "Elixir"
