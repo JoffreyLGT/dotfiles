@@ -245,14 +245,7 @@ fi
 # ---------------------------------------------------------------------------
 step "Installing Claude Code"
 if ! command_exists claude; then
-  info "Adding the Claude Code apt repository..."
-  sudo install -d -m 0755 /etc/apt/keyrings
-  sudo curl -fsSL https://downloads.claude.ai/keys/claude-code.asc \
-    -o /etc/apt/keyrings/claude-code.asc
-  echo "deb [signed-by=/etc/apt/keyrings/claude-code.asc] https://downloads.claude.ai/claude-code/apt/stable stable main" |
-    sudo tee /etc/apt/sources.list.d/claude-code.list
-  sudo apt update
-  install_apt claude-code
+  curl -fsSL https://claude.ai/install.sh | bash
 else
   skip "Claude Code"
 fi
