@@ -36,6 +36,7 @@ command_exists() { command -v "$1" >/dev/null 2>&1; }
 font_installed() { fc-list 2>/dev/null | grep -qi "$1"; }
 snap_installed() { snap list "$1" >/dev/null 2>&1; }
 apt_installed() { dpkg -s "$1" >/dev/null 2>&1; }
+flatpak_installed() { flatpak info "$1" >/dev/null 2>&1; }
 
 # Install a snap package only if it is missing.
 install_snap() {
@@ -63,6 +64,20 @@ install_apt() {
     info "Installing: ${missing[*]}"
     sudo apt install -y "${missing[@]}" && success "${missing[*]} installed"
   fi
+}
+
+# Install a Flathub application, pulling in flatpak and the remote when needed.
+install_flatpak() {
+  local app_id="$1"
+  if ! command_exists flatpak; then
+    info "Installing flatpak..."
+    sudo apt install -y flatpak || return 1
+  fi
+  # --if-not-exists makes this a no-op when the remote is already configured.
+  sudo flatpak remote-add --if-not-exists flathub \
+    https://dl.flathub.org/repo/flathub.flatpakrepo || return 1
+  info "Installing $app_id from Flathub..."
+  sudo flatpak install -y flathub "$app_id"
 }
 
 # ---------------------------------------------------------------------------
@@ -319,12 +334,13 @@ else
     "Obsidian|obsidian|sudo snap install obsidian --classic"
     "Ghostty|ghostty|sudo snap install ghostty --classic" # community-maintained snap
     "Bruno|bruno|sudo snap install bruno"
-    "Podman|podman|sudo apt install -y podman"
+    "Podman|podman-compose|sudo apt install -y podman podman-compose"
+    "Podman Desktop|io.podman_desktop.PodmanDesktop|install_flatpak io.podman_desktop.PodmanDesktop"
   )
 
   for entry in "${EXTRA_APPS[@]}"; do
     IFS='|' read -r name check install <<<"$entry"
-    if command_exists "$check" || snap_installed "$check"; then
+    if command_exists "$check" || snap_installed "$check" || flatpak_installed "$check"; then
       skip "$name"
       continue
     fi
@@ -343,6 +359,20 @@ else
       ;;
     esac
   done
+fi
+
+# ---------------------------------------------------------------------------
+# Podman socket
+# Podman Desktop talks to the Podman CLI through the user socket, so enable it
+# whenever Podman is present. `enable --now` is idempotent, so re-runs are safe.
+# ---------------------------------------------------------------------------
+if command_exists podman; then
+  step "Enabling the Podman user socket"
+  if systemctl --user enable --now podman.socket 2>/dev/null; then
+    success "podman.socket enabled"
+  else
+    info "Skipped (no systemd user session, e.g. WSL2 without systemd)"
+  fi
 fi
 
 step "All done! Your environment is ready."
