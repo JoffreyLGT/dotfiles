@@ -80,6 +80,27 @@ install_flatpak() {
   sudo flatpak install -y flathub "$app_id"
 }
 
+# Register Microsoft's azure-cli apt repository and install the package.
+# This follows the documented manual steps rather than the curl|bash one-liner
+# so the package stays verified against a pinned signing key.
+install_azure_cli() {
+  local keyring="/etc/apt/keyrings/microsoft.gpg"
+  install_apt ca-certificates curl apt-transport-https lsb-release gnupg
+  if [ ! -f "$keyring" ]; then
+    info "Adding the Microsoft signing key..."
+    sudo mkdir -p /etc/apt/keyrings
+    curl -sSLf https://packages.microsoft.com/keys/microsoft.asc |
+      sudo gpg --dearmor -o "$keyring" || return 1
+    sudo chmod go+r "$keyring"
+  fi
+  info "Adding the azure-cli repository..."
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=$keyring] \
+https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" |
+    sudo tee /etc/apt/sources.list.d/azure-cli.list >/dev/null || return 1
+  sudo apt update
+  sudo apt install -y azure-cli
+}
+
 # ---------------------------------------------------------------------------
 # Refresh the package index once up front
 # ---------------------------------------------------------------------------
@@ -336,6 +357,7 @@ else
     "Bruno|bruno|sudo snap install bruno"
     "Podman|podman-compose|sudo apt install -y podman podman-compose"
     "Podman Desktop|io.podman_desktop.PodmanDesktop|install_flatpak io.podman_desktop.PodmanDesktop"
+    "Azure CLI|az|install_azure_cli"
   )
 
   for entry in "${EXTRA_APPS[@]}"; do
