@@ -121,8 +121,26 @@ eval "$(starship init bash)"
 
 alias config='/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME'
 
-export PATH=$HOME/.elixir-install/installs/otp/28.4/bin/:$PATH
-export PATH=$HOME/.elixir-install/installs/elixir/1.20.2-otp-28/bin:$PATH
-export PATH=$HOME/.local/share/gem/ruby/3.3.0/bin:$PATH
+# Prepend a directory to PATH, skipping it if it is missing or already there.
+# Guards against duplicate entries when .bashrc is re-sourced or a nested shell
+# inherits an already-populated PATH.
+path_prepend() {
+  [ -d "$1" ] || return 0
+  case ":$PATH:" in
+  *":$1:"*) ;;
+  *) PATH="$1:$PATH" ;;
+  esac
+}
+
+path_prepend "$HOME/.elixir-install/installs/otp/28.4/bin"
+path_prepend "$HOME/.elixir-install/installs/elixir/1.20.2-otp-28/bin"
+# Ruby's user gem dir is version-scoped and Tumbleweed rolls it forward, so
+# resolve it by glob rather than pinning a version that goes stale. Sorted
+# ascending, so the newest Ruby is prepended last and wins.
+for _gem_bin in "$HOME"/.local/share/gem/ruby/*/bin; do
+  path_prepend "$_gem_bin"
+done
+unset _gem_bin
+export PATH
 
 export EDITOR="nvim"
