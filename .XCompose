@@ -1,0 +1,10 @@
+# Start from the system Compose file for the current locale (en_US.UTF-8).
+include "%L"
+
+# Windows US-International behaviour: ' + c produces C-cedilla, not C-acute.
+<dead_acute> <c>        : "ç"   ccedilla
+<dead_acute> <C>        : "Ç"   Ccedilla
+
+# Keep c-acute reachable via Compose (Compose key, then c then ').
+<Multi_key> <c> <apostrophe>    : "ć"   U0107
+<Multi_key> <C> <apostrophe>    : "Ć"   U0106
