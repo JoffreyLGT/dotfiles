@@ -134,6 +134,11 @@ path_prepend() {
 
 path_prepend "$HOME/.elixir-install/installs/otp/28.4/bin"
 path_prepend "$HOME/.elixir-install/installs/elixir/1.20.2-otp-28/bin"
+# Go toolchain, plus the default GOPATH bin where `go install` drops binaries.
+# Hardcoded rather than `$(go env GOPATH)` to keep shell startup free of a
+# subprocess; path_prepend already skips it when the directory is missing.
+path_prepend "/usr/local/go/bin"
+path_prepend "$HOME/go/bin"
 # Ruby's user gem dir is version-scoped and Tumbleweed rolls it forward, so
 # resolve it by glob rather than pinning a version that goes stale. Sorted
 # ascending, so the newest Ruby is prepended last and wins.
