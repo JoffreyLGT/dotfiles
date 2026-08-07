@@ -202,13 +202,62 @@ git config --global push.autoSetupRemote true
 success "Dotfiles checked out"
 
 # ---------------------------------------------------------------------------
+# Go toolchain
+# Installed before the CLI tools because lazygit is built from source with it.
+# Ubuntu's golang-go package lags well behind, so follow the official tarball
+# instructions from https://go.dev/doc/install instead.
+# ---------------------------------------------------------------------------
+GO_VERSION="1.26.5"
+# .bashrc puts both of these on PATH for interactive shells, but this script may
+# run before that takes effect. Export them up front so the version check below
+# sees an existing install instead of re-downloading it on every run, and so the
+# rest of the script can use go and anything `go install` builds.
+export PATH="$PATH:/usr/local/go/bin:$HOME/go/bin"
+step "Installing Go $GO_VERSION"
+if [ "$(go version 2>/dev/null | awk '{print $3}')" = "go$GO_VERSION" ]; then
+  skip "Go $GO_VERSION"
+else
+  # dpkg's architecture names (amd64, arm64) match Go's tarball naming.
+  GO_TARBALL="go$GO_VERSION.linux-$(dpkg --print-architecture).tar.gz"
+  info "Downloading $GO_TARBALL..."
+  if curl -fsSL -o "/tmp/$GO_TARBALL" "https://go.dev/dl/$GO_TARBALL" &&
+    curl -fsSL -o "/tmp/$GO_TARBALL.sha256" "https://dl.google.com/go/$GO_TARBALL.sha256"; then
+    # The published .sha256 holds the bare digest, so pair it with the filename
+    # to get the two-column format sha256sum -c expects.
+    if (cd /tmp && echo "$(cat "$GO_TARBALL.sha256")  $GO_TARBALL" | sha256sum -c - >/dev/null); then
+      # Never untar over an existing tree — the docs warn it yields a broken
+      # install, so the old one is removed first.
+      sudo rm -rf /usr/local/go &&
+        sudo tar -C /usr/local -xzf "/tmp/$GO_TARBALL" &&
+        success "Go $GO_VERSION installed to /usr/local/go"
+    else
+      info "Checksum mismatch for $GO_TARBALL — skipping the Go install"
+    fi
+  else
+    info "Download failed — skipping the Go install"
+  fi
+  rm -f "/tmp/$GO_TARBALL" "/tmp/$GO_TARBALL.sha256"
+fi
+
+# ---------------------------------------------------------------------------
 # Core CLI tooling
 # ---------------------------------------------------------------------------
 step "Installing CLI tools from the snap store"
 install_snap nvim --classic
 install_snap tree
-install_snap lazygit
 install_snap direnv
+
+# lazygit ships no apt package and its snap is community-maintained and stale,
+# so build it from source — the method its README documents.
+step "Installing lazygit"
+if command_exists lazygit; then
+  skip "lazygit"
+elif command_exists go; then
+  info "Building lazygit with go install (this can take a while)..."
+  go install github.com/jesseduffield/lazygit@latest && success "lazygit installed"
+else
+  info "Skipped (Go is not available)"
+fi
 
 step "Installing CLI tools from apt"
 # wl-clipboard covers the Plasma Wayland session, xclip the X11 one.
