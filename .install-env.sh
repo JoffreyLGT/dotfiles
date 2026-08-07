@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # This script is written to help setup a new machine effortlessly.
-# It is written for Ubuntu and works for machine installation and WSL2.
+# It is written for Kubuntu (KDE Plasma) and works for machine installation
+# and WSL2.
 #
 # It is safe to re-run: every step checks whether the software is already
 # present before downloading or installing anything.
@@ -38,18 +39,6 @@ snap_installed() { snap list "$1" >/dev/null 2>&1; }
 apt_installed() { dpkg -s "$1" >/dev/null 2>&1; }
 flatpak_installed() { flatpak info "$1" >/dev/null 2>&1; }
 
-# Install a snap package only if it is missing.
-install_snap() {
-  local pkg="$1"
-  shift
-  if snap_installed "$pkg"; then
-    skip "$pkg"
-  else
-    info "Installing $pkg from the snap store..."
-    sudo snap install "$pkg" "$@" && success "$pkg installed"
-  fi
-}
-
 # Install any apt packages that are not already present, in a single call.
 install_apt() {
   local pkg missing=()
@@ -66,12 +55,40 @@ install_apt() {
   fi
 }
 
+# Kubuntu does not always ship snapd, so make sure it is there before using it.
+ensure_snapd() {
+  if command_exists snap; then
+    return 0
+  fi
+  info "snapd is missing — installing it..."
+  sudo apt install -y snapd || return 1
+  success "snapd installed"
+}
+
+# Install a snap package only if it is missing.
+install_snap() {
+  local pkg="$1"
+  shift
+  ensure_snapd || return 1
+  if snap_installed "$pkg"; then
+    skip "$pkg"
+  else
+    info "Installing $pkg from the snap store..."
+    sudo snap install "$pkg" "$@" && success "$pkg installed"
+  fi
+}
+
 # Install a Flathub application, pulling in flatpak and the remote when needed.
 install_flatpak() {
   local app_id="$1"
   if ! command_exists flatpak; then
     info "Installing flatpak..."
     sudo apt install -y flatpak || return 1
+  fi
+  # Let Discover (Kubuntu's software centre) manage flatpaks too.
+  if apt_installed plasma-discover && ! apt_installed plasma-discover-backend-flatpak; then
+    info "Installing the Discover flatpak backend..."
+    sudo apt install -y plasma-discover-backend-flatpak
   fi
   # --if-not-exists makes this a no-op when the remote is already configured.
   sudo flatpak remote-add --if-not-exists flathub \
@@ -194,21 +211,50 @@ install_snap lazygit
 install_snap direnv
 
 step "Installing CLI tools from apt"
-install_apt gnome-tweaks curl wl-clipboard tmux ripgrep fd-find unzip
-
-# Set Capslock as Ctrl
-info "Mapping Caps Lock to Ctrl..."
-gsettings set org.gnome.desktop.input-sources xkb-options "['ctrl:nocaps']" 2>/dev/null &&
-  success "Caps Lock mapped to Ctrl" ||
-  info "Skipped (no GNOME session, e.g. WSL2)"
+# wl-clipboard covers the Plasma Wayland session, xclip the X11 one.
+install_apt curl wl-clipboard xclip tmux ripgrep fd-find unzip
 
 # ---------------------------------------------------------------------------
-# GNOME Shell extension support
-# chrome-gnome-shell is the native host connector that lets extensions.gnome.org
-# install and manage extensions from the browser.
+# Keyboard: map Caps Lock to Ctrl
+# Plasma stores xkb options in ~/.config/kxkbrc, applied at session start.
 # ---------------------------------------------------------------------------
-step "Installing GNOME Shell extension support"
-install_apt chrome-gnome-shell
+step "Mapping Caps Lock to Ctrl"
+KWRITECONFIG=""
+for candidate in kwriteconfig6 kwriteconfig5 kwriteconfig; do
+  if command_exists "$candidate"; then
+    KWRITECONFIG="$candidate"
+    break
+  fi
+done
+if [ -n "$KWRITECONFIG" ]; then
+  "$KWRITECONFIG" --file kxkbrc --group Layout --key Options "ctrl:nocaps"
+  # Without ResetOldOptions the option is merged with the X server defaults
+  # instead of replacing them, and the remap silently does nothing.
+  "$KWRITECONFIG" --file kxkbrc --group Layout --key ResetOldOptions "true"
+  success "Caps Lock mapped to Ctrl in ~/.config/kxkbrc"
+  # Apply immediately when running an X11 session; Wayland picks it up on the
+  # next login.
+  if [ -n "$DISPLAY" ] && command_exists setxkbmap; then
+    setxkbmap -option ctrl:nocaps 2>/dev/null &&
+      info "Applied to the running X11 session"
+  else
+    info "Log out and back in to apply it to the current session"
+  fi
+else
+  info "Skipped (no KDE tooling found, e.g. WSL2)"
+fi
+
+# ---------------------------------------------------------------------------
+# Plasma browser integration
+# The KDE counterpart of chrome-gnome-shell: the native host connector used by
+# the Plasma Browser Integration extension (media controls, downloads, KRunner).
+# ---------------------------------------------------------------------------
+step "Installing Plasma browser integration"
+if grep -qi microsoft /proc/version; then
+  info "Skipped (WSL detected)"
+else
+  install_apt plasma-browser-integration
+fi
 
 # ---------------------------------------------------------------------------
 # tmux plugin manager (tpm)
